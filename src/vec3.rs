@@ -1,5 +1,6 @@
 pub use crate::types::Float;
 
+#[derive(Debug)]
 struct Vec3 {
     x: Float,
     y: Float,
@@ -83,6 +84,7 @@ impl Vec3 {
         }
     }
 }
+#[derive(Debug)]
 pub struct Point {
     vec: Vec3,
 }
@@ -93,6 +95,7 @@ impl Point {
         }
     }
 }
+#[derive(Debug)]
 pub struct Direction {
     vec: Vec3,
 }
@@ -113,6 +116,16 @@ impl Direction {
         self.vec.x /= l;
         self.vec.y /= l;
         self.vec.z /= l;
+    }
+    pub fn unit_vector(&mut self) -> Self {
+        let l = self.length();
+        Self {
+            vec: Vec3 {
+                x: self.vec.x / l,
+                y: self.vec.y / l,
+                z: self.vec.z / l,
+            },
+        }
     }
     pub fn dot(&self, other: &Self) -> Float {
         self.vec.dot(&other.vec)
