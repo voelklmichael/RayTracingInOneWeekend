@@ -1,4 +1,4 @@
-use crate::rbg::{RGBu8, RGB};
+use crate::rgb::{RGBu8, RGB};
 use bmp::Image;
 
 pub fn convert_to_bmp(picture: &[Vec<RGB>]) -> Image {

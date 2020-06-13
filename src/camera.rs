@@ -1,18 +1,7 @@
-use crate::ray::{Direction, Float, Point, Ray};
-use crate::rbg::RGB;
+use crate::rgb::RGB;
+use crate::scene::{Direction, Float, Point, Ray, Scene};
 
-fn ray_color(ray: Ray) -> RGB {
-    let dir = ray.direction().unit_vector();
-    let t = 0.5 * (dir.y() + 1.);
-    let s = 1. - t;
-    RGB {
-        r: s + 0.5 * t,
-        g: s + 0.7 * t,
-        b: s + 1.0 * t,
-    }
-}
-
-pub fn cast_rays(image_width: usize, image_height: usize) -> Vec<Vec<RGB>> {
+pub fn cast_rays(image_width: usize, image_height: usize, scene: &Scene) -> Vec<Vec<RGB>> {
     let aspect_ratio = image_width as Float / image_height as Float;
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
@@ -41,7 +30,11 @@ pub fn cast_rays(image_width: usize, image_height: usize) -> Vec<Vec<RGB>> {
                 lower_left_corner.clone() + horizontal.clone() * u + vertical.clone() * v
                     - origin.clone();
             let ray = Ray::new(origin.clone(), direction);
-            let rbg = ray_color(ray);
+            let rbg = if let Some((hit, material)) = scene.hit(&ray, 0., Float::INFINITY) {
+                material.get_color(&hit)
+            } else {
+                scene.background(&ray)
+            };
             row.push(rbg);
             progress += 1;
             if progress == progress_every {

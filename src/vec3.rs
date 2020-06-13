@@ -58,6 +58,11 @@ impl Vec3 {
             z: x * oy - y * ox,
         }
     }
+    fn invert(&mut self) {
+        self.x *= -1.;
+        self.y *= -1.;
+        self.z *= -1.;
+    }
 }
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -67,6 +72,11 @@ impl Point {
     pub fn origin() -> Self {
         Self {
             vec: Vec3::origin(),
+        }
+    }
+    pub fn new(x: Float, y: Float, z: Float) -> Self {
+        Self {
+            vec: Vec3::new(x, y, z),
         }
     }
 }
@@ -97,11 +107,11 @@ impl Direction {
     pub fn extract(&self) -> (Float, Float, Float) {
         (self.vec.x, self.vec.y, self.vec.z)
     }
-    pub fn l2_norm(&self) -> Float {
+    pub fn l2_norm_squared(&self) -> Float {
         self.vec.l2_norm()
     }
     pub fn length(&self) -> Float {
-        self.l2_norm().sqrt()
+        self.l2_norm_squared().sqrt()
     }
     pub fn make_unit_vector(&mut self) {
         let l = self.length();
@@ -109,7 +119,7 @@ impl Direction {
         self.vec.y /= l;
         self.vec.z /= l;
     }
-    pub fn unit_vector(&mut self) -> Self {
+    pub fn unit_vector(&self) -> Self {
         let l = self.length();
         Self {
             vec: Vec3 {
@@ -121,6 +131,9 @@ impl Direction {
     }
     pub fn dot(&self, other: &Self) -> Float {
         self.vec.dot(&other.vec)
+    }
+    pub fn invert(&mut self) {
+        self.vec.invert();
     }
 }
 impl std::ops::Add<Direction> for Point {

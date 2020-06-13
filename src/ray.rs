@@ -12,14 +12,17 @@ impl Ray {
             direction,
         }
     }
-    pub fn position(&self) -> Point {
-        self.position.clone()
+    pub fn position(&self) -> &Point {
+        &self.position
     }
-    pub fn direction(&self) -> Direction {
-        self.direction.clone()
+    pub fn direction(&self) -> &Direction {
+        &self.direction
     }
 
     pub fn progress(&mut self, t: Float) {
         self.position = self.position.clone() + (self.direction.clone() * t)
+    }
+    pub fn next(&self, t: Float) -> Point {
+        self.position.clone() + (self.direction.clone() * t)
     }
 }

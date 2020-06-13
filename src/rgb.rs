@@ -31,4 +31,25 @@ impl RGB {
             b: Self::round_(b),
         }
     }
+    pub fn average(&self, other: &Self) -> Self {
+        Self {
+            r: 0.5 * (self.r + other.r),
+            g: 0.5 * (self.g + other.g),
+            b: 0.5 * (self.b + other.b),
+        }
+    }
+    pub fn white() -> Self {
+        Self {
+            r: 1.,
+            g: 1.,
+            b: 1.,
+        }
+    }
+    pub fn black() -> Self {
+        Self {
+            r: 0.,
+            g: 0.,
+            b: 0.,
+        }
+    }
 }
