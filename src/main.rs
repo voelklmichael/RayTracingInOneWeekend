@@ -1,6 +1,7 @@
 mod bmp_converter;
 mod rbg;
 mod types;
+mod vec3;
 
 fn main() {
     println!("Hello, world!");
