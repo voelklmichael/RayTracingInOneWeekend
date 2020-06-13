@@ -12,9 +12,7 @@ fn main() {
     println!("Hello, world!");
 
     let image_width = 384;
-    //let image_height = 256;
-    let aspect_ratio = 9. / 16.;
-    let image_height = (image_width as types::Float * aspect_ratio) as usize;
+    let aspect_ratio = 16. / 9.;
     let mut scene = scene::Scene::new(rgb::RGB {
         r: 0.5,
         g: 0.7,
@@ -31,7 +29,8 @@ fn main() {
         )),
         Box::new(material::NormalColor::new(rgb::RGB::white())),
     );
-    let picture = camera::cast_rays(image_width, image_height, &scene);
+    let camera = camera::Camera::new(vec3::Point::origin(), aspect_ratio);
+    let picture = camera.cast_rays(image_width, &scene, 100);
 
     bmp_converter::write_file("sample.bmp", &picture).expect("Failed to write image");
     println!("File written");

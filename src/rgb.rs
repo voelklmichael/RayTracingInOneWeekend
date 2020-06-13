@@ -52,4 +52,17 @@ impl RGB {
             b: 0.,
         }
     }
+    pub fn normalize(&mut self, n: usize) {
+        let m = 1. / n as Float;
+        self.r *= m;
+        self.g *= m;
+        self.b *= m;
+    }
+}
+impl std::ops::AddAssign<RGB> for RGB {
+    fn add_assign(&mut self, rhs: RGB) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b;
+    }
 }
