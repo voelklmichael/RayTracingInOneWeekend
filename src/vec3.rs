@@ -66,6 +66,22 @@ impl Vec3 {
         let Self { x, y, z } = self;
         x * x + y * y + z * z
     }
+    fn dot(&self, other: &Self) -> Float {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+    fn cross(&self, other: &Self) -> Self {
+        let Self { x, y, z } = self;
+        let Self {
+            x: ox,
+            y: oy,
+            z: oz,
+        } = other;
+        Self {
+            x: y * oz - z * oy,
+            y: z * ox - x * oz,
+            z: x * oy - y * ox,
+        }
+    }
 }
 pub struct Point {
     vec: Vec3,
@@ -91,6 +107,15 @@ impl Direction {
     }
     pub fn length(&self) -> Float {
         self.l2_norm().sqrt()
+    }
+    pub fn make_unit_vector(&mut self) {
+        let l = self.length();
+        self.vec.x /= l;
+        self.vec.y /= l;
+        self.vec.z /= l;
+    }
+    pub fn dot(&self, other: &Self) -> Float {
+        self.vec.dot(&other.vec)
     }
 }
 impl std::ops::Add<Direction> for Point {
