@@ -1,6 +1,6 @@
 pub use crate::types::Float;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Vec3 {
     x: Float,
     y: Float,
@@ -29,32 +29,7 @@ impl Vec3 {
     fn extract(&self) -> (Float, Float, Float) {
         (self.x, self.y, self.z)
     }
-    fn add(&self, other: Self) -> Self {
-        let Self { x, y, z } = self;
-        let Self {
-            x: ox,
-            y: oy,
-            z: oz,
-        } = other;
-        Self {
-            x: x + ox,
-            y: y + oy,
-            z: z + oz,
-        }
-    }
-    fn substract(&self, other: Self) -> Self {
-        let Self { x, y, z } = self;
-        let Self {
-            x: ox,
-            y: oy,
-            z: oz,
-        } = other;
-        Self {
-            x: x - ox,
-            y: y - oy,
-            z: z - oz,
-        }
-    }
+
     fn scale(&self, factor: Float) -> Self {
         let Self { x, y, z } = self;
         Self {
@@ -84,7 +59,7 @@ impl Vec3 {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Point {
     vec: Vec3,
 }
@@ -95,7 +70,7 @@ impl Point {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Direction {
     vec: Vec3,
 }
@@ -104,6 +79,23 @@ impl Direction {
         Self {
             vec: Vec3::new(0., 0., 1.),
         }
+    }
+    pub fn new(x: Float, y: Float, z: Float) -> Self {
+        Self {
+            vec: Vec3::new(x, y, z),
+        }
+    }
+    pub fn x(&self) -> Float {
+        self.vec.x
+    }
+    pub fn y(&self) -> Float {
+        self.vec.y
+    }
+    pub fn z(&self) -> Float {
+        self.vec.z
+    }
+    pub fn extract(&self) -> (Float, Float, Float) {
+        (self.vec.x, self.vec.y, self.vec.z)
     }
     pub fn l2_norm(&self) -> Float {
         self.vec.l2_norm()
@@ -140,10 +132,10 @@ impl std::ops::Add<Direction> for Point {
     }
 }
 
-impl std::ops::Sub<Direction> for Direction {
-    type Output = Point;
-    fn sub(self, rhs: Direction) -> Self::Output {
-        Point {
+impl std::ops::Sub<Point> for Point {
+    type Output = Direction;
+    fn sub(self, rhs: Point) -> Self::Output {
+        Direction {
             vec: self.vec - rhs.vec,
         }
     }
@@ -152,16 +144,37 @@ impl std::ops::Sub<Direction> for Direction {
 impl std::ops::Add<Vec3> for Vec3 {
     type Output = Vec3;
     fn add(self, rhs: Vec3) -> Self::Output {
-        self.add(rhs)
+        let Self { x, y, z } = self;
+        let Self {
+            x: ox,
+            y: oy,
+            z: oz,
+        } = rhs;
+        Self {
+            x: x + ox,
+            y: y + oy,
+            z: z + oz,
+        }
     }
 }
 
 impl std::ops::Sub<Vec3> for Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: Vec3) -> Self::Output {
-        self.substract(rhs)
+        let Self { x, y, z } = self;
+        let Self {
+            x: ox,
+            y: oy,
+            z: oz,
+        } = rhs;
+        Self {
+            x: x - ox,
+            y: y - oy,
+            z: z - oz,
+        }
     }
 }
+
 impl std::ops::Mul<Float> for Vec3 {
     type Output = Vec3;
     fn mul(self, factor: Float) -> Self::Output {
