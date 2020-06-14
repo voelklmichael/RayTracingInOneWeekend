@@ -1,6 +1,6 @@
 pub use crate::types::Float;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RGB {
     pub r: Float,
     pub g: Float,
@@ -69,6 +69,14 @@ impl RGB {
         self.g *= m;
         self.b *= m;
     }
+    pub fn random(min: Float, max: Float) -> Self {
+        use crate::types::generate_random_in_between;
+        Self {
+            r: generate_random_in_between(min, max),
+            g: generate_random_in_between(min, max),
+            b: generate_random_in_between(min, max),
+        }
+    }
 }
 impl std::ops::AddAssign<RGB> for RGB {
     fn add_assign(&mut self, rhs: RGB) {
@@ -100,5 +108,16 @@ impl std::ops::MulAssign<&RGB> for RGB {
         self.r *= rhs.r;
         self.g *= rhs.g;
         self.b *= rhs.b;
+    }
+}
+
+impl std::ops::Mul<RGB> for RGB {
+    type Output = RGB;
+    fn mul(self, rhs: RGB) -> RGB {
+        Self {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
+        }
     }
 }
