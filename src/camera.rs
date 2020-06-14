@@ -7,6 +7,8 @@ pub struct Camera {
     horizontal: Direction,
     vertical: Direction,
     aspect_ratio: Float,
+    lens_radius: Float,
+    onb: crate::onb::ONB,
 }
 impl Camera {
     pub fn new(
@@ -15,6 +17,8 @@ impl Camera {
         vertical_field_of_view: Float,
         view_up: Direction,
         aspect_ratio: Float,
+        aperture: Float,
+        focus_dist: Float,
     ) -> Self {
         let theta = vertical_field_of_view.to_radians();
         let h = (theta / 2.).tan();
@@ -22,28 +26,34 @@ impl Camera {
         let viewport_width = aspect_ratio * viewport_height;
 
         let normal = (center.clone() - looking_towards).unit_vector();
-        let (u, v) = crate::onb::construct_onb_from_view_up(&normal, &view_up);
-        let horizontal = u * viewport_width;
-        let vertical = v * viewport_height;
+        let onb = crate::onb::construct_onb_from_view_up(&normal, &view_up);
+        let horizontal = &onb.u * viewport_width * focus_dist;
+        let vertical = &onb.v * viewport_height * focus_dist;
 
         let lower_left_corner = (&horizontal * -0.5)
             .add(&(&vertical * -0.5))
-            .add(&(normal * -1.));
+            .add(&(&onb.w * -1. * focus_dist));
         Self {
             center,
             lower_left_corner,
             horizontal,
             vertical,
             aspect_ratio,
+            lens_radius: aperture / 2.,
+            onb,
         }
     }
     pub fn cast_ray(&self, u: Float, v: Float) -> Ray {
+        let rd = Direction::random_in_unit_disk() * self.lens_radius;
+        let offset = (&self.onb.u * rd.x()).add(&(&self.onb.v * rd.y()));
+
         let direction = self
             .lower_left_corner
             .clone()
             .add(&(self.horizontal.clone() * u))
-            .add(&(self.vertical.clone() * v));
-        Ray::new(self.center.clone(), direction)
+            .add(&(self.vertical.clone() * v))
+            .add(&(offset.clone() * -1.));
+        Ray::new(self.center.clone() + offset, direction)
     }
 
     pub fn cast_rays(

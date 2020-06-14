@@ -44,13 +44,22 @@ fn main() {
         material::Lambertian::new(rgb::RGB::new(0.8, 0.8, 0.0)),
     );
 
+    let center = vec3::Point::new(3., 3., 2.);
+    let looking_towards = vec3::Point::new(0., 0., -1.);
+    let view_up = vec3::Direction::new(0., 1., 0.);
+    let focus_dist = (center.clone() - looking_towards.clone()).length();
+    let aperture = 2.;
+    let vertical_field_of_view = 20.;
     let camera = camera::Camera::new(
-        vec3::Point::new(-2., 2., 1.),
-        vec3::Point::new(0., 0., -1.),
-        20.,
-        vec3::Direction::new_y(),
+        center,
+        looking_towards,
+        vertical_field_of_view,
+        view_up,
         aspect_ratio,
+        aperture,
+        focus_dist,
     );
+
     let picture = camera.cast_rays(image_width, &scene, rays_per_pixel, recursion_depth);
 
     bmp_converter::write_file("sample.bmp", &picture).expect("Failed to write image");

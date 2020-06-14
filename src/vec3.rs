@@ -38,7 +38,7 @@ impl Vec3 {
             z: z * factor,
         }
     }
-    fn l2_norm(&self) -> Float {
+    fn l2_norm_squared(&self) -> Float {
         let Self { x, y, z } = self;
         x * x + y * y + z * z
     }
@@ -75,7 +75,7 @@ impl Vec3 {
     }
     fn random_unit_vector() -> Self {
         let r = Self::random();
-        let l = r.l2_norm();
+        let l = r.l2_norm_squared();
         r * (1. / l)
     }
     pub fn lambertian_z() -> Self {
@@ -144,7 +144,7 @@ impl Direction {
         (self.vec.x, self.vec.y, self.vec.z)
     }
     pub fn l2_norm_squared(&self) -> Float {
-        self.vec.l2_norm()
+        self.vec.l2_norm_squared()
     }
     pub fn length(&self) -> Float {
         self.l2_norm_squared().sqrt()
@@ -211,6 +211,19 @@ impl Direction {
 
         let r_out_perp = n * (-(1.0 - r_out_parallel.l2_norm_squared()).sqrt());
         r_out_parallel.add(&r_out_perp)
+    }
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            use crate::types::generate_random_in_between;
+            let vec = Vec3::new(
+                generate_random_in_between(-1., 1.),
+                generate_random_in_between(-1., 1.),
+                0.,
+            );
+            if vec.l2_norm_squared() < 1. {
+                return Self { vec };
+            }
+        }
     }
 }
 impl std::ops::Add<Direction> for Point {
