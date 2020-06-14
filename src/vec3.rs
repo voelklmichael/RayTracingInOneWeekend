@@ -1,6 +1,6 @@
 pub use crate::types::Float;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Vec3 {
     x: Float,
     y: Float,
@@ -80,11 +80,21 @@ impl Point {
         }
     }
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Direction {
     vec: Vec3,
 }
 impl Direction {
+    pub fn new_x() -> Self {
+        Self {
+            vec: Vec3::new(1., 0., 0.),
+        }
+    }
+    pub fn new_y() -> Self {
+        Self {
+            vec: Vec3::new(0., 1., 0.),
+        }
+    }
     pub fn new_z() -> Self {
         Self {
             vec: Vec3::new(0., 0., 1.),
@@ -134,6 +144,11 @@ impl Direction {
     }
     pub fn invert(&mut self) {
         self.vec.invert();
+    }
+    pub fn cross(&self, other: &Self) -> Self {
+        Self {
+            vec: self.vec.cross(&other.vec),
+        }
     }
 }
 impl std::ops::Add<Direction> for Point {
@@ -212,4 +227,39 @@ impl std::ops::Div<Float> for Direction {
             vec: vec.scale(1. / factor),
         }
     }
+}
+
+#[test]
+fn cross_product_test() {
+    let dx = Direction::new_x();
+    let dy = Direction::new_y();
+    let dz = Direction::new_z();
+    assert_eq!(&dz, &dx.cross(&dy));
+    assert_eq!(&dx, &dy.cross(&dz));
+    assert_eq!(&dy, &dz.cross(&dx));
+
+    assert_eq!(&(dz.clone() * -1.), &dy.cross(&dx));
+    assert_eq!(&(dx.clone() * -1.), &dz.cross(&dy));
+    assert_eq!(&(dy.clone() * -1.), &dx.cross(&dz));
+}
+#[test]
+fn dot_product_test() {
+    let dx = Direction::new_x();
+    let dy = Direction::new_y();
+    let dz = Direction::new_z();
+    assert_eq!(0., dx.dot(&dy));
+    assert_eq!(0., dy.dot(&dz));
+    assert_eq!(0., dz.dot(&dx));
+
+    assert_eq!(0., dy.dot(&dx));
+    assert_eq!(0., dz.dot(&dy));
+    assert_eq!(0., dx.dot(&dz));
+
+    assert_eq!(1., dx.dot(&dx));
+    assert_eq!(1., dy.dot(&dy));
+    assert_eq!(1., dz.dot(&dz));
+}
+#[test]
+fn failure_test_to_check_github() {
+    assert!(false, "Failure test to check github")
 }
