@@ -3,23 +3,32 @@ use crate::scene::{Direction, Float, Point, Ray, Scene};
 
 pub struct Camera {
     center: Point,
-    lower_left_corner: Point,
+    lower_left_corner: Direction,
     horizontal: Direction,
     vertical: Direction,
     aspect_ratio: Float,
 }
 impl Camera {
-    pub fn new(center: Point, aspect_ratio: Float) -> Self {
-        let viewport_height = 2.0;
+    pub fn new(
+        center: Point,
+        looking_towards: Point,
+        vertical_field_of_view: Float,
+        view_up: Direction,
+        aspect_ratio: Float,
+    ) -> Self {
+        let theta = vertical_field_of_view.to_radians();
+        let h = (theta / 2.).tan();
+        let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
-        let focal_length = 1.0;
 
-        let horizontal = Direction::new(viewport_width, 0., 0.);
-        let vertical = Direction::new(0., viewport_height, 0.);
-        let lower_left_corner = center.clone()
-            + horizontal.clone() / -2.0
-            + vertical.clone() / -2.0
-            + Direction::new(0., 0., -focal_length);
+        let normal = (center.clone() - looking_towards).unit_vector();
+        let (u, v) = crate::onb::construct_onb_from_view_up(&normal, &view_up);
+        let horizontal = u * viewport_width;
+        let vertical = v * viewport_height;
+
+        let lower_left_corner = (&horizontal * -0.5)
+            .add(&(&vertical * -0.5))
+            .add(&(normal * -1.));
         Self {
             center,
             lower_left_corner,
@@ -29,10 +38,11 @@ impl Camera {
         }
     }
     pub fn cast_ray(&self, u: Float, v: Float) -> Ray {
-        let direction = self.lower_left_corner.clone()
-            + self.horizontal.clone() * u
-            + self.vertical.clone() * v
-            - self.center.clone();
+        let direction = self
+            .lower_left_corner
+            .clone()
+            .add(&(self.horizontal.clone() * u))
+            .add(&(self.vertical.clone() * v));
         Ray::new(self.center.clone(), direction)
     }
 

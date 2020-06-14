@@ -1,9 +1,11 @@
+mod dielectric;
 mod fuzzy_metal;
 mod lambertian;
 mod specular;
 
 pub use crate::hittables::{Direction, Float, HitRecord, Point, Ray};
 pub use crate::rgb::RGB;
+pub use dielectric::Dielectric;
 pub use fuzzy_metal::FuzzyMetal;
 pub use lambertian::Lambertian;
 pub use specular::Specular;

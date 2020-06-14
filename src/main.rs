@@ -2,6 +2,7 @@ mod bmp_converter;
 mod camera;
 mod hittables;
 mod material;
+mod onb;
 mod ray;
 mod rgb;
 mod scene;
@@ -20,28 +21,36 @@ fn main() {
         g: 0.7,
         b: 1.,
     });
+    use hittables::Sphere;
     scene.push(
-        Box::new(hittables::Sphere::new(vec3::Point::new(1., 0., -1.), 0.5)),
-        Box::new(material::FuzzyMetal::new(rgb::RGB::new(0.8, 0.6, 0.2), 0.3)),
+        Sphere::new(vec3::Point::new(1., 0., -1.), 0.5),
+        material::FuzzyMetal::new(rgb::RGB::new(0.8, 0.6, 0.2), 0.),
     );
     scene.push(
-        Box::new(hittables::Sphere::new(vec3::Point::new(-1., 0., -1.), 0.5)),
-        Box::new(material::FuzzyMetal::new(rgb::RGB::new(0.8, 0.8, 0.8), 1.0)),
-    );
-
-    scene.push(
-        Box::new(hittables::Sphere::new(vec3::Point::new(0., 0., -1.), 0.5)),
-        Box::new(material::Lambertian::new(rgb::RGB::new(0.7, 0.3, 0.3))),
+        Sphere::new(vec3::Point::new(-1., 0., -1.), 0.5),
+        material::Dielectric::new(1.5),
     );
     scene.push(
-        Box::new(hittables::Sphere::new(
-            vec3::Point::new(0., -100.5, -1.),
-            100.,
-        )),
-        Box::new(material::Lambertian::new(rgb::RGB::new(0.8, 0.8, 0.0))),
+        Sphere::new(vec3::Point::new(-1., 0., -1.), -0.45),
+        material::Dielectric::new(1.5),
     );
 
-    let camera = camera::Camera::new(vec3::Point::origin(), aspect_ratio);
+    scene.push(
+        Sphere::new(vec3::Point::new(0., 0., -1.), 0.5),
+        material::Lambertian::new(rgb::RGB::new(0.1, 0.2, 0.5)),
+    );
+    scene.push(
+        Sphere::new(vec3::Point::new(0., -100.5, -1.), 100.),
+        material::Lambertian::new(rgb::RGB::new(0.8, 0.8, 0.0)),
+    );
+
+    let camera = camera::Camera::new(
+        vec3::Point::new(-2., 2., 1.),
+        vec3::Point::new(0., 0., -1.),
+        20.,
+        vec3::Direction::new_y(),
+        aspect_ratio,
+    );
     let picture = camera.cast_rays(image_width, &scene, rays_per_pixel, recursion_depth);
 
     bmp_converter::write_file("sample.bmp", &picture).expect("Failed to write image");

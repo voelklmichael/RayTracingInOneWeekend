@@ -16,17 +16,17 @@ impl Scene {
             background,
         }
     }
-    pub fn push(&mut self, h: Box<dyn Hittable>, m: Box<dyn Material>) {
+    pub fn push<M: Material + 'static, H: Hittable + 'static>(&mut self, h: H, m: M) {
         let hash = m.hash();
         let index = if let Some(index) = self.materials_hashes.iter().position(|&h| h == hash) {
             index
         } else {
             let index = self.materials_hashes.len();
-            self.materials.push(m);
+            self.materials.push(Box::new(m));
             self.materials_hashes.push(hash);
             index
         };
-        self.objects.push((h, index));
+        self.objects.push((Box::new(h), index));
     }
     pub fn clear(&mut self, new_background: RGB) {
         self.objects.clear();

@@ -176,6 +176,11 @@ impl Direction {
             vec: self.vec.cross(&other.vec),
         }
     }
+    pub fn random_in_unit_sphere() -> Self {
+        let vec = Vec3::random_unit_vector();
+        let vec = vec * crate::types::generate_random();
+        Self { vec }
+    }
     pub fn random_unit_vector() -> Self {
         Self {
             vec: Vec3::random_unit_vector(),
@@ -199,6 +204,13 @@ impl Direction {
         normal.add(&Self {
             vec: Vec3::random_unit_vector(),
         })
+    }
+    pub fn refract(uv: &Self, n: &Self, etai_over_etat: Float) -> Self {
+        let cos_theta = n.dot(&(uv * (-1.)));
+        let r_out_parallel = (uv.add(&(n * cos_theta))) * etai_over_etat;
+
+        let r_out_perp = n * (-(1.0 - r_out_parallel.l2_norm_squared()).sqrt());
+        r_out_parallel.add(&r_out_perp)
     }
 }
 impl std::ops::Add<Direction> for Point {
