@@ -41,6 +41,7 @@ impl Camera {
         image_width: usize,
         scene: &Scene,
         rays_per_pixel: usize,
+        recursion_depth: u32,
     ) -> Vec<Vec<RGB>> {
         let image_height = (image_width as Float / self.aspect_ratio) as usize;
 
@@ -61,12 +62,9 @@ impl Camera {
                         (colum_index as Float + generate_random()) / ((image_width - 1) as Float);
                     let v =
                         (row_index as Float + generate_random()) / ((image_height - 1) as Float);
-                    let ray = self.cast_ray(u, v);
-                    rgb += if let Some((hit, material)) = scene.hit(&ray, 0., Float::INFINITY) {
-                        material.get_color(&hit)
-                    } else {
-                        scene.background(&ray)
-                    };
+                    let mut ray = self.cast_ray(u, v);
+                    Self::trace(&mut ray, scene, recursion_depth);
+                    rgb += ray.brightness();
                 }
                 rgb.normalize(rays_per_pixel);
 
@@ -81,6 +79,22 @@ impl Camera {
         }
         pb.finish_print("done");
         picture
+    }
+    fn trace(ray: &mut Ray, scene: &Scene, recursion_depth: u32) {
+        if let Some((hit, material)) = scene.hit(&ray, 0.0001, Float::INFINITY) {
+            ray.progress(hit.distance);
+            if material.scatter(ray, &hit) {
+                if recursion_depth == 0 {
+                    ray.adjust_brightness(&RGB::black())
+                } else {
+                    Self::trace(ray, scene, recursion_depth - 1)
+                }
+            } else {
+                ray.adjust_brightness(&RGB::black())
+            }
+        } else {
+            ray.adjust_brightness(&scene.background(ray));
+        }
     }
 }
 

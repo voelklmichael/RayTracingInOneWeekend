@@ -15,6 +15,9 @@ pub struct RGBu8 {
 }
 
 impl RGB {
+    pub fn new(r: Float, g: Float, b: Float) -> Self {
+        Self { r, g, b }
+    }
     fn round_(f: &Float) -> u8 {
         let f = *f * 255.999;
         if f < 256.0 {
@@ -29,6 +32,14 @@ impl RGB {
             r: Self::round_(r),
             g: Self::round_(g),
             b: Self::round_(b),
+        }
+    }
+    pub fn gamma2(&self) -> RGBu8 {
+        let Self { r, g, b } = self;
+        RGBu8 {
+            r: Self::round_(&r.sqrt()),
+            g: Self::round_(&g.sqrt()),
+            b: Self::round_(&b.sqrt()),
         }
     }
     pub fn average(&self, other: &Self) -> Self {
@@ -64,5 +75,30 @@ impl std::ops::AddAssign<RGB> for RGB {
         self.r += rhs.r;
         self.g += rhs.g;
         self.b += rhs.b;
+    }
+}
+impl std::ops::Add<RGB> for RGB {
+    type Output = RGB;
+    fn add(self, rhs: RGB) -> RGB {
+        Self {
+            r: self.r + rhs.r,
+            g: self.g + rhs.g,
+            b: self.b + rhs.b,
+        }
+    }
+}
+
+impl std::ops::AddAssign<&RGB> for RGB {
+    fn add_assign(&mut self, rhs: &RGB) {
+        self.r += rhs.r;
+        self.g += rhs.g;
+        self.b += rhs.b;
+    }
+}
+impl std::ops::MulAssign<&RGB> for RGB {
+    fn mul_assign(&mut self, rhs: &RGB) {
+        self.r *= rhs.r;
+        self.g *= rhs.g;
+        self.b *= rhs.b;
     }
 }

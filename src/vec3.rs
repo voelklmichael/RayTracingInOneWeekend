@@ -63,6 +63,32 @@ impl Vec3 {
         self.y *= -1.;
         self.z *= -1.;
     }
+    fn random() -> Self {
+        use crate::types::generate_random;
+        Self::new(generate_random(), generate_random(), generate_random())
+    }
+    fn random_in_between(min: Float, max: Float) -> Self {
+        use crate::types::generate_random;
+        let diff = max - min;
+        let random = || min + diff * generate_random();
+        Self::new(random(), random(), random())
+    }
+    fn random_unit_vector() -> Self {
+        let r = Self::random();
+        let l = r.l2_norm();
+        r * (1. / l)
+    }
+    pub fn lambertian_z() -> Self {
+        use crate::types::generate_random_in_between;
+        let a = generate_random_in_between(0., std::f64::consts::PI as Float * 2.);
+        let z = generate_random_in_between(-1., 1.);
+        let r = (1. - z * z).sqrt();
+        Self {
+            x: r * a.cos(),
+            y: r * a.sin(),
+            z,
+        }
+    }
 }
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -150,6 +176,30 @@ impl Direction {
             vec: self.vec.cross(&other.vec),
         }
     }
+    pub fn random_unit_vector() -> Self {
+        Self {
+            vec: Vec3::random_unit_vector(),
+        }
+    }
+    pub fn add(&self, other: &Self) -> Self {
+        Self {
+            vec: self.vec.clone() + other.vec.clone(),
+        }
+    }
+    pub fn lambertian_z() -> Self {
+        Self {
+            vec: Vec3::lambertian_z(),
+        }
+    }
+    pub fn reflect(&self, normal: &Self) -> Self {
+        let dot = self.dot(normal);
+        self.add(&(normal * (dot * -2.)))
+    }
+    pub fn random_lambertian(normal: &Self) -> Self {
+        normal.add(&Self {
+            vec: Vec3::random_unit_vector(),
+        })
+    }
 }
 impl std::ops::Add<Direction> for Point {
     type Output = Point;
@@ -199,6 +249,15 @@ impl std::ops::Sub<Vec3> for Vec3 {
             x: x - ox,
             y: y - oy,
             z: z - oz,
+        }
+    }
+}
+
+impl std::ops::Mul<Float> for &Direction {
+    type Output = Direction;
+    fn mul(self, factor: Float) -> Self::Output {
+        Direction {
+            vec: self.vec.scale(factor),
         }
     }
 }

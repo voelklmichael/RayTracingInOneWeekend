@@ -3,17 +3,9 @@ pub type Float = f32;
 pub fn generate_random() -> Float {
     rand::prelude::random()
 }
-/*
-pub fn clamp(x: Float, min: Float, max: Float) -> Float {
-    if x < min {
-        min
-    } else if x > max {
-        max
-    } else {
-        x
-    }
-}*/
-
+pub fn generate_random_in_between(min: Float, max: Float) -> Float {
+    min + (max - min) * rand::prelude::random::<Float>()
+}
 #[test]
 fn bla() {
     for _ in 0..100 {
