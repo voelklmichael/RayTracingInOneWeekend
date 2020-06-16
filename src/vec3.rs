@@ -343,7 +343,3 @@ fn dot_product_test() {
     assert_eq!(1., dy.dot(&dy));
     assert_eq!(1., dz.dot(&dz));
 }
-#[test]
-fn failure_test_to_check_github() {
-    assert!(false, "Failure test to check github")
-}
